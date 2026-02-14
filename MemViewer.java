@@ -18,14 +18,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.awt.event.*;
 
-public class MemViewer extends JPanel implements KeyListener
+public class MemViewer
 {
     int[][] colors_7800 = {{0, 0, 0}, {13, 13, 13}, {40, 40, 40}, {62, 62, 62}, {82, 82, 82}, {101, 101, 101}, {119, 119, 119}, {136, 136, 136}, {152, 152, 152}, {168, 168, 168}, {183, 183, 183}, {198, 198, 198}, {213, 213, 213}, {227, 227, 227}, {241, 241, 241}, {255, 255, 255}, {89, 38, 0}, {105, 58, 0}, {121, 77, 0}, {137, 94, 0}, {151, 110, 0}, {166, 126, 0}, {180, 141, 0}, {193, 156, 0}, {207, 170, 0}, {220, 184, 0}, {233, 197, 0}, {245, 211, 0}, {255, 224, 0}, {255, 236, 0}, {255, 249, 30}, {255, 255, 52}, {135, 0, 0}, {150, 30, 0}, {164, 51, 0}, {178, 70, 0}, {192, 88, 0}, {205, 105, 0}, {218, 121, 0}, {231, 136, 0}, {244, 151, 0}, {255, 165, 0}, {255, 179, 0}, {255, 193, 25}, {255, 206, 47}, {255, 219, 67}, {255, 232, 85}, {255, 245, 101}, {159, 0, 0}, {173, 0, 0}, {187, 25, 0}, {200, 48, 0}, {213, 67, 0}, {226, 85, 0}, {239, 102, 28}, {252, 118, 50}, {255, 133, 69}, {255, 148, 87}, {255, 162, 104}, {255, 177, 120}, {255, 190, 135}, {255, 204, 150}, {255, 217, 164}, {255, 230, 178}, {158, 0, 37}, {172, 0, 58}, {186, 3, 76}, {199, 32, 93}, {213, 53, 110}, {226, 72, 125}, {238, 89, 141}, {251, 106, 155}, {255, 122, 169}, {255, 137, 183}, {255, 152, 197}, {255, 166, 210}, {255, 180, 223}, {255, 194, 236}, {255, 207, 249}, {255, 220, 255}, {133, 0, 145}, {148, 0, 159}, {163, 0, 173}, {177, 28, 187}, {190, 50, 201}, {204, 69, 214}, {217, 87, 227}, {230, 103, 240}, {243, 119, 252}, {255, 135, 255}, {255, 149, 255}, {255, 164, 255}, {255, 178, 255}, {255, 192, 255}, {255, 205, 255}, {255, 218, 255}, {86, 0, 212}, {103, 0, 225}, {119, 13, 238}, {134, 38, 250}, {149, 59, 255}, {163, 77, 255}, {177, 94, 255}, {191, 111, 255}, {204, 126, 255}, {218, 141, 255}, {230, 156, 255}, {243, 170, 255}, {255, 184, 255}, {255, 198, 255}, {255, 211, 255}, {255, 224, 255}, {10, 0, 242}, {36, 13, 255}, {57, 38, 255}, {75, 58, 255}, {93, 77, 255}, {109, 94, 255}, {125, 110, 255}, {140, 126, 255}, {155, 141, 255}, {169, 156, 255}, {183, 170, 255}, {196, 184, 255}, {210, 197, 255}, {223, 211, 255}, {235, 224, 255}, {248, 237, 255}, {0, 21, 235}, {0, 44, 247}, {0, 64, 255}, {0, 82, 255}, {24, 99, 255}, {47, 115, 255}, {66, 130, 255}, {84, 145, 255}, {101, 160, 255}, {117, 174, 255}, {133, 188, 255}, {148, 201, 255}, {162, 214, 255}, {176, 227, 255}, {190, 240, 255}, {203, 253, 255}, {0, 51, 189}, {0, 70, 203}, {0, 88, 216}, {0, 104, 229}, {0, 120, 242}, {0, 135, 254}, {6, 150, 255}, {33, 165, 255}, {54, 179, 255}, {73, 192, 255}, {91, 206, 255}, {107, 219, 255}, {123, 232, 255}, {138, 244, 255}, {153, 255, 255}, {167, 255, 255}, {0, 72, 108}, {0, 89, 124}, {0, 106, 139}, {0, 122, 153}, {0, 137, 168}, {0, 151, 182}, {0, 166, 195}, {0, 180, 209}, {28, 193, 222}, {50, 207, 234}, {69, 220, 247}, {87, 233, 255}, {104, 245, 255}, {120, 255, 255}, {135, 255, 255}, {150, 255, 255}, {0, 82, 0}, {0, 99, 0}, {0, 115, 22}, {0, 131, 45}, {0, 146, 65}, {0, 160, 83}, {0, 174, 100}, {14, 188, 116}, {39, 202, 131}, {59, 215, 146}, {78, 228, 161}, {95, 241, 175}, {111, 253, 189}, {127, 255, 202}, {142, 255, 215}, {157, 255, 228}, {0, 82, 0}, {0, 99, 0}, {0, 115, 0}, {0, 131, 0}, {0, 146, 0}, {16, 160, 0}, {40, 174, 0}, {60, 188, 0}, {79, 202, 21}, {96, 215, 44}, {112, 228, 64}, {128, 241, 82}, {143, 253, 99}, {157, 255, 115}, {171, 255, 131}, {185, 255, 146}, {0, 72, 0}, {0, 89, 0}, {21, 106, 0}, {44, 122, 0}, {64, 137, 0}, {82, 152, 0}, {99, 166, 0}, {115, 180, 0}, {130, 194, 0}, {145, 207, 0}, {160, 220, 0}, {174, 233, 0}, {188, 246, 13}, {201, 255, 38}, {214, 255, 58}, {227, 255, 77}, {57, 51, 0}, {76, 70, 0}, {93, 88, 0}, {109, 105, 0}, {125, 120, 0}, {140, 136, 0}, {155, 151, 0}, {169, 165, 0}, {183, 179, 0}, {197, 193, 0}, {210, 206, 0}, {223, 219, 0}, {236, 232, 0}, {248, 245, 0}, {255, 255, 23}, {255, 255, 45}, {115, 21, 0}, {130, 44, 0}, {145, 64, 0}, {160, 82, 0}, {174, 99, 0}, {188, 115, 0}, {201, 131, 0}, {214, 146, 0}, {227, 160, 0}, {240, 174, 0}, {253, 188, 0}, {255, 202, 0}, {255, 215, 2}, {255, 228, 31}, {255, 240, 53}, {255, 253, 72}};
 
     byte[] data;
     int dll;
     JFrame frame;
-//    HelpDialog helpDialog;
+    JPanel masterPanel;
     JLabel filenameLabel;
     JLabel bitmapScreenLabel;
     JLabel bitmapAddressSpaceLabel;
@@ -52,7 +52,6 @@ public class MemViewer extends JPanel implements KeyListener
     Color reg_BACKGROUND;
     Color[] reg_palette = new Color[24];
     String graphicMode;
-//    ExportDialog dialog;
 
     class HorizontalZone {
         public int y;
@@ -797,38 +796,35 @@ public class MemViewer extends JPanel implements KeyListener
         return fc.getSelectedFile();
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////
     // CREATE MEMVIEWER WINDOW
     ////////////////////////////////////////////////////////////////////////////////////////
 
-    public MemViewer(JFrame frame, File file) throws Exception {
-        this.frame = frame;
+    public MemViewer(File file) throws Exception {
+        this.frame = new JFrame("7800 Mem Viewer");
+        this.masterPanel = new JPanel();
+        masterPanel.setPreferredSize(new Dimension(2000, 1120));
+        
+        frame.add(masterPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationByPlatform( true );
+        frame.pack();
+        frame.setVisible( true );        
+
         SetComponents();
 
         LoadData(file);
     }
 
     public void SetComponents() {
-        removeAll();
-        controlPanel = new JPanel();
-        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.PAGE_AXIS));
-        JPanel infoPanel = new JPanel(new GridLayout(8, 1));
-        controlPanel.add(infoPanel);
+        masterPanel.removeAll();
+        masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+
         JPanel filePanel = new JPanel();
         filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.LINE_AXIS));
-        controlPanel.add(filePanel);
+        masterPanel.add(filePanel);
         filenameLabel = new JLabel(filename);
         filePanel.add(filenameLabel);
         filePanel.add(new JLabel(" "));
@@ -836,7 +832,7 @@ public class MemViewer extends JPanel implements KeyListener
         Icon icon = UIManager.getIcon("Tree.openIcon");
         JButton loadButton = new JButton(icon);
         loadButton.setMargin(new Insets(0, 0, 0, 0));
-        loadButton.addKeyListener(this);
+
         loadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -853,18 +849,6 @@ public class MemViewer extends JPanel implements KeyListener
             
         });
         filePanel.add(loadButton);
-        infoPanel.add(filePanel);
-
-        JPanel addressPanel = new JPanel();
-        addressPanel.setLayout(new BoxLayout(addressPanel, BoxLayout.LINE_AXIS));
-
-        JButton exportButton = new JButton("Export as PNG");
-        exportButton.addKeyListener(this);
-        infoPanel.add(exportButton);
-
-        add(controlPanel);
-
-        JTabbedPane tabbedPane = new JTabbedPane();
   
         ImageIcon bitmap = new ImageIcon();
         bitmapScreenLabel = new JLabel();
@@ -888,23 +872,29 @@ public class MemViewer extends JPanel implements KeyListener
         horizontalZoneDetail.setFont(font);
         horizontalZoneDetail.setText(emptyZoneDetail);
         bitmapScreenPanel.add(horizontalZoneDetail, gbc);
+        JScrollPane bitmapScreenScroll = new JScrollPane(bitmapScreenPanel);
+        bitmapScreenScroll.setPreferredSize(new Dimension(1880,1000));
+        bitmapScreenScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        bitmapScreenScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
         ImageIcon bitmap2 = new ImageIcon();
         bitmapAddressSpaceLabel = new JLabel(bitmap2);
 
         dllPanel = new JPanel();
         JScrollPane dllScroll = new JScrollPane(dllPanel);
-        dllScroll.setPreferredSize(new Dimension(185,195));
+        dllScroll.setPreferredSize(new Dimension(1880,1000));
+        dllScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         dllScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         JScrollPane addressSpaceScroll = new JScrollPane(bitmapAddressSpaceLabel);
-        addressSpaceScroll.setPreferredSize(new Dimension(2048,1050));
+        addressSpaceScroll.setPreferredSize(new Dimension(1880,1000));
         addressSpaceScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        addressSpaceScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        tabbedPane.addTab("Screen", bitmapScreenPanel);
+        tabbedPane.addTab("Screen", bitmapScreenScroll);
         tabbedPane.addTab("DLL", dllScroll);
         tabbedPane.addTab("Address Space", addressSpaceScroll);
-        add(tabbedPane);
+        masterPanel.add(tabbedPane);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -916,20 +906,8 @@ public class MemViewer extends JPanel implements KeyListener
         File file = openFile();
         if (file == null) return;
         
-        JFrame frame = new JFrame("7800 Mem Viewer");
-        MemViewer memViewer = new MemViewer(frame, file);
+        MemViewer memViewer = new MemViewer(file);
         memViewer.Refresh();
-
-        JScrollPane scrollPane = new JScrollPane(memViewer);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        scrollPane.setBounds(50, 30, 320, 1000);
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(scrollPane);
-        frame.setLocationByPlatform( true );
-        frame.pack();
-        frame.setVisible( true );
-        frame.addKeyListener(memViewer);
     }
 
     public static void main(String[] args)
