@@ -36,6 +36,7 @@ public class MemViewer
     File file;
     String path;
     JPanel controlPanel;
+    JPanel hudPanel;
     BufferedImage screenImage = new BufferedImage(1280, 960, BufferedImage.TYPE_INT_RGB);
     BufferedImage screenImageClean = new BufferedImage(1280, 960, BufferedImage.TYPE_INT_RGB);
     BufferedImage addressSpaceImage = new BufferedImage(8192+64, 1024, BufferedImage.TYPE_INT_RGB);
@@ -52,6 +53,7 @@ public class MemViewer
     Color reg_BACKGROUND;
     Color[] reg_palette = new Color[24];
     String graphicMode;
+    LinkedList<Integer> dllCandidates;
 
     class HorizontalZone {
         public int y;
@@ -164,23 +166,35 @@ public class MemViewer
         }
     }    
 
-    void FindDLL() {
-        for (int offset = 0x1800; offset < 0x2800; offset++) {
-            int byte0 = data[offset];
-            int byte1 = data[offset+1];
-            int byte2 = data[offset+2];
-            if (byte0 < 0) byte0 += 256;
-            if (byte1 < 0) byte1 += 256;
-            if (byte2 < 0) byte2 += 256;
-            int dl = (byte1 << 8) + byte2;
-            if ((byte0 & 0x10) == 0 && dl >= 0x1800 && dl < 0x2800) {
-                System.out.printf("DLL: 0x%04X\n", offset);
-                offset += 3;
-                while (data[offset+1] != 0 || data[offset+2] != 0) {
-                    offset += 3;
-                }
+    int isDLL(int offset, int nb) {
+        int byte0 = data[offset];
+        int byte1 = data[offset+1];
+        int byte2 = data[offset+2];
+        if (byte0 < 0) byte0 += 256;
+        if (byte1 < 0) byte1 += 256;
+        if (byte2 < 0) byte2 += 256;
+        int dl = (byte1 << 8) + byte2;
+        if ((byte0 & 0x10) == 0 && dl >= 0x1800 && dl < 0x2800) {
+            return isDLL(offset+3, nb+1);
+        }
+        return nb;
+    }
+
+    LinkedList<Integer> FindDLLCandidates() {
+        LinkedList<Integer> dllCandidates = new LinkedList<>();
+        int offset = 0x1800;
+        while (offset < 0x2800) {
+            int nb = isDLL(offset, 0);
+            if (nb < 10) {
+                offset++;
+            } else {
+                dllCandidates.add(offset);
+                System.out.printf("DLL: 0x%04X (%d)\n", offset, nb);
+                offset += (nb*3);
             }
         }
+
+        return dllCandidates;
     }
 
     private void LoadData(File file) throws Exception {
@@ -190,26 +204,31 @@ public class MemViewer
         this.reg_CHARBASE = 0xC000;
         this.reg_CTRL = 0x10;
         this.data = Files.readAllBytes(file.toPath());
-//        FindDLL();
+
+        dllCandidates = FindDLLCandidates();
 
         if (!ReadJson()) {
             int[] paletteDefault = new int[] {
-                0xF00, 0x0F0, 0x00F,
-                0xFF0, 0xF0F, 0x0FF,
-                0xFFF, 0x800, 0x080,
-                0x008, 0x880, 0x808,
-                0x088, 0x888, 0xF88,
-                0x8F8, 0x88F, 0xFF8,
-                0xF8F, 0x8FF, 0xF80,
-                0xF08, 0x0F8, 0x08F
+                0x0F, 0x08, 0x18,
+                0x28, 0x38, 0x48,
+                0x58, 0x68, 0x78,
+                0x88, 0x98, 0xA8,
+                0xB8, 0xC8, 0xD8,
+                0xE8, 0xF8, 0x24,
+                0x44, 0x64, 0x84,
+                0xA4, 0xC4, 0xE4
             };
             for (int i=0; i<24; i++) {
-                int r = paletteDefault[i] >> 16;
-                int g = (paletteDefault[i] >> 8) & 0xF;
-                int b = paletteDefault[i] & 0xF;
-                reg_palette[i] = getColor(r, g, b);
+                int color = paletteDefault[i];
+                int[] rgb = colors_7800[color];
+                reg_palette[i] = getColor(rgb[0], rgb[1], rgb[2]);
             }    
             registers = new LinkedList<>();
+            if (dllCandidates.size() > 0) {
+                dll = dllCandidates.get(0);
+            } else {
+                dll = 0x1800;
+            }
         }
         resetRegisterSet();
     }
@@ -237,6 +256,31 @@ public class MemViewer
         boolean matchFound = matcher.find();
         if (matchFound) return matcher;
         return null;
+    }
+
+    public void SetDLLCandidateButtons() {
+        while (hudPanel.getComponentCount() > 3) {
+            hudPanel.remove(3);
+        }
+
+        if (dll > 0 && !dllCandidates.contains(dll)) {
+            dllCandidates.add(0, dll);
+        }
+
+        for (int dllAddress : dllCandidates) {
+            JButton dllButton = new JButton();
+            dllButton.setText(String.format("0x%04X", dllAddress));
+            hudPanel.add(dllButton);
+            dllButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dll = dllAddress;
+                    try {
+                    Refresh();
+                    } catch (Exception ee) {}
+                }
+            });
+        }
     }
 
     public void Refresh() throws Exception
@@ -651,7 +695,7 @@ public class MemViewer
         Font font = new Font(Font.MONOSPACED, Font.PLAIN, 14);
         int y = 0;
         int dl_idx = 0;
-        while (data[offset] != 0 && y < 240) {
+        while ((data[offset] != 0 || data[offset+1] != 0 || data[offset+2] != 0) && y < 240) {
             int b1 = data[offset];
             int b2 = data[offset+1];
             int b3 = data[offset+2];
@@ -705,8 +749,6 @@ public class MemViewer
             offset += 3;
 
         }
-
-
 
         return dllPanel;
     }
@@ -811,9 +853,9 @@ public class MemViewer
         frame.pack();
         frame.setVisible( true );        
 
+        LoadData(file);
         SetComponents();
 
-        LoadData(file);
     }
 
     public void SetComponents() {
@@ -822,17 +864,19 @@ public class MemViewer
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        JPanel filePanel = new JPanel();
-        filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.LINE_AXIS));
-        masterPanel.add(filePanel);
-        filenameLabel = new JLabel(filename);
-        filePanel.add(filenameLabel);
-        filePanel.add(new JLabel(" "));
+        hudPanel = new JPanel();
+        hudPanel.setLayout(new BoxLayout(hudPanel, BoxLayout.LINE_AXIS));
+        masterPanel.add(hudPanel);
 
+        // Filename label
+        filenameLabel = new JLabel(filename);
+        hudPanel.add(filenameLabel);
+        hudPanel.add(new JLabel(" "));
+
+        // Open file icon
         Icon icon = UIManager.getIcon("Tree.openIcon");
         JButton loadButton = new JButton(icon);
         loadButton.setMargin(new Insets(0, 0, 0, 0));
-
         loadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -840,6 +884,7 @@ public class MemViewer
                 if (file == null) return;
                 try {
                     LoadData(file);
+                    SetDLLCandidateButtons();
                     Refresh();
                     frame.pack();
                 } catch (Exception ex) {
@@ -848,8 +893,11 @@ public class MemViewer
             }
             
         });
-        filePanel.add(loadButton);
-  
+        hudPanel.add(loadButton);
+
+        // DLL candidates
+        SetDLLCandidateButtons();
+
         ImageIcon bitmap = new ImageIcon();
         bitmapScreenLabel = new JLabel();
         bitmapScreenLabel.setIcon(bitmap);
